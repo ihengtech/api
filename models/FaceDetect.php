@@ -16,6 +16,7 @@ use Yii;
 class FaceDetect extends \yii\db\ActiveRecord
 {
 
+    const API_URL = 'http://back-groud.ihengtech.com:6688';
     /**
      * {@inheritdoc}
      */

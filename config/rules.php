@@ -6,15 +6,15 @@ return [
         'class' => 'yii\rest\UrlRule',
         'controller' => 'user'
     ]
+    */
     [
         'class' => 'yii\rest\UrlRule',
-        'controller' => 'face',
+        'controller' => 'face-detect',
         'except' => ['update', 'index', 'view', 'delete', 'options', 'create'],
         'extraPatterns' => [
-            'POST analysis' => 'analysis',
+            'GET api-analysis' => 'api-analysis',
         ],
     ],
-    */
     [
         'class' => 'yii\rest\UrlRule',
         'controller' => 'file-manage',
