@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\models\FaceDetect;
+use app\models\Config;
 use app\models\FileManage;
 use common\helpers\HttpClient;
 use common\helpers\Util;
@@ -58,6 +58,7 @@ class FaceDetectController extends ActiveController
     }
 
     /**
+     * 人脸分析
      * @throws NotFoundHttpException
      */
     public function actionApiAnalysis()
@@ -72,13 +73,18 @@ class FaceDetectController extends ActiveController
         }
         $filePath = Yii::getAlias('@fileManage') . DIRECTORY_SEPARATOR . $fileManage->unique_name;
         if (file_exists($filePath)) {
-            $url = FaceDetect::API_URL . '/api/image/baiduapi/upload';
+            $url = Config::ADV_API_URL . '/api/image/baiduapi/upload';
             $httpClient = new HttpClient();
             $data = $httpClient->post($url, ['file' => curl_file_create($filePath)], [], [], false);
             Yii::debug(Json::encode($data));
-            $content = Util::parseHttpClientContent($data);
-            print_r($content);
-            exit;
+            $content = Util::parseHttpClientFaceDetectData($data);
+            //@debug
+            return [
+                ['key' => '性别', 'value' => '男'],
+                ['key' => '年龄', 'value' => '20'],
+                ['key' => '得分', 'value' => '100'],
+                ['key' => '表情', 'value' => '微笑'],
+            ];
         }
         throw new NotFoundHttpException('图片不存在!');
     }

@@ -16,6 +16,8 @@ use Yii;
  */
 class Config extends \yii\db\ActiveRecord
 {
+
+    const ADV_API_URL = 'http://back-groud.ihengtech.com:6688';
     /**
      * {@inheritdoc}
      */

@@ -6,7 +6,7 @@ use yii\helpers\Json;
 
 class  Util
 {
-    public static function parseHttpClientContent($data)
+    public static function parseHttpClientFaceDetectData($data)
     {
         $content = [];
         try {
@@ -20,6 +20,16 @@ class  Util
             } catch (\Throwable $e) {
                 $content = [];
             }
+        }
+        return $content;
+    }
+
+    public static function parseHttpClientWaresData($data)
+    {
+        try {
+            $content = Json::decode($data['content']);
+        } catch (\Throwable $e) {
+            $content = [];
         }
         return $content;
     }
