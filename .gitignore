@@ -2,3 +2,4 @@
 runtime
 web/assets
 /vendor
+/upload

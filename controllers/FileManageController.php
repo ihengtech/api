@@ -10,6 +10,7 @@ use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use yii\web\ServerErrorHttpException;
+use yii\web\UploadedFile;
 
 class FileManageController extends ActiveController
 {
@@ -51,38 +52,22 @@ class FileManageController extends ActiveController
     }
 
     /**
-     * 使用base64方式上传文件
      * @return FileManage
      * @throws ServerErrorHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\web\ForbiddenHttpException
      */
     public function actionCreate()
     {
-        $this->checkAccess($this->id);
-        $model = new FileManage(['scenario' => FileManage::SCENARIO_CREATE]);
-        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
-        if ($model->save()) {
+        $model = new FileManage();
+        $model->raw_name = UploadedFile::getInstanceByName('raw_name');
+        if (!$model->validate()) {
             return $model;
-        } elseif (!$model->hasErrors()) {
-            throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
         }
-        return $model;
-    }
-
-    /**
-     * 使用表单形式上传文件
-     * @return FileManage
-     * @throws ServerErrorHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\web\ForbiddenHttpException
-     */
-    public function actionUpload()
-    {
-        $this->checkAccess($this->id);
-        $model = new FileManage(['scenario' => FileManage::SCENARIO_UPLOAD]);
-        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
-        if ($model->save()) {
+        $fileObject = $model->raw_name;
+        $model->setDefaultField();
+        $model->raw_name = $fileObject->getBaseName();
+        $model->unique_name = $model->getUniqueName($fileObject->tempName, $fileObject->getExtension());
+        $savePath = Yii::getAlias('@fileManage') . DIRECTORY_SEPARATOR . $model->unique_name;
+        if ($fileObject->saveAs($savePath) && $model->save(false)) {
             return $model;
         } elseif (!$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to create the object for unknown reason.');

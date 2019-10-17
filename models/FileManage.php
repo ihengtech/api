@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "{{%file_manage}}".
@@ -18,9 +19,6 @@ use Yii;
 class FileManage extends \yii\db\ActiveRecord
 {
 
-    const SCENARIO_CREATE = 'create';
-    const SCENARIO_UPLOAD = 'upload';
-
     /**
      * {@inheritdoc}
      */
@@ -30,31 +28,17 @@ class FileManage extends \yii\db\ActiveRecord
     }
 
     /**
-     * 场景
-     * @return array
-     */
-    public function scenarios()
-    {
-        $attributeLabels = array_keys($this->attributeLabels());
-        $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_CREATE] = $attributeLabels;
-        $scenarios[self::SCENARIO_UPLOAD] = $attributeLabels;
-        return $scenarios;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['device_id'], 'integer'],
-            [['raw_name', 'unique_name'], 'required'],
+            [['raw_name'], 'required'],
             [['detail'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['unique_name'], 'string', 'max' => 255],
-            //场景
-            [['raw_name'], 'file', 'extensions' => 'png,jpg,jpeg,gif', 'on' => FileManage::SCENARIO_UPLOAD],
+            [['raw_name'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png,jpg,jpeg,gif'],
         ];
     }
 
@@ -86,10 +70,9 @@ class FileManage extends \yii\db\ActiveRecord
 
     /**
      * @param $src
-     * @param int $percent
      * @param $saveFilename
-     * @param string $saveDir
-     * @return bool|string
+     * @param int $percent
+     * @return bool
      */
     public static function compressImage($src, $saveFilename, $percent = 1)
     {
@@ -131,6 +114,19 @@ class FileManage extends \yii\db\ActiveRecord
         $saveFunction($distImage, $tmpFile);
         imagedestroy($distImage);
         return true;
+    }
+
+    public function setDefaultField()
+    {
+        $this->device_id = 0;
+        $this->detail = Json::encode([]);
+        $this->created_at = date('Y-m-d H:i:s', time());
+        $this->updated_at = date('Y-m-d H:i:s', time());
+    }
+
+    public function getUniqueName($tmpName, $extensionName)
+    {
+        return md5(uniqid('img_') . $tmpName . microtime() . rand(1, 100)) . '.' . $extensionName;
     }
 
     /**
