@@ -3,11 +3,11 @@
 namespace app\models;
 
 /**
- * This is the ActiveQuery class for [[Face]].
+ * This is the ActiveQuery class for [[FaceDetect]].
  *
- * @see Face
+ * @see FaceDetect
  */
-class FaceQuery extends \yii\db\ActiveQuery
+class FaceDetectQuery extends \yii\db\ActiveQuery
 {
     /*public function active()
     {
@@ -16,7 +16,7 @@ class FaceQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return Face[]|array
+     * @return FaceDetect[]|array
      */
     public function all($db = null)
     {
@@ -25,7 +25,7 @@ class FaceQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return Face|array|null
+     * @return FaceDetect|array|null
      */
     public function one($db = null)
     {

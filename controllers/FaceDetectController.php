@@ -8,7 +8,12 @@ use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 
-class FaceController extends ActiveController
+/**
+ * 参考url: http://back-groud.ihengtech.com:6688/swagger-ui.html
+ * Class FaceController
+ * @package app\controllers
+ */
+class FaceDetectController extends ActiveController
 {
     public $modelClass = 'app\models\Face';
     public $serializer = [

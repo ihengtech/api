@@ -7,36 +7,42 @@ use yii\web\IdentityInterface;
 use yii\filters\RateLimitInterface;
 
 /**
- * This is the model class for table "user".
+ * This is the model class for table "{{%user}}".
  *
  * @property int $id ID
- * @property string $username 登录用户名
- * @property string $avatar_url 头像地址
+ * @property string $mobile_phone 手机号码
+ * @property string $we_chat_open_id 微信 OPENID
+ * @property string $username 用户名
  * @property string $password_hash 密码
- * @property string $auth_key AUTH KEY
- * @property string $access_token TOKEN
- * @property string $password_reset_token RESET TOKEN
- * @property string $access_token_expired_at TOKEN EXPIRED AT
- * @property string $email 电子邮箱
- * @property string $mobile_phone 移动电话
- * @property string $raw_role 原始角色
- * @property int $status 状态
- * @property int $allowance ALLOWANCE
- * @property int $allowance_updated_at ALLOWANCE UPDATED AT
- * @property int $rate_limit RATE LIMIT
+ * @property string $access_token ACCESS_TOKEN
+ * @property int $role 角色
+ * @property int $points 积分
+ * @property string $avatar_url 头像
+ * @property string $email 电子邮件
+ * @property string $auth_key 验证KEY
+ * @property string $access_token_expired_at TOKEN 过期时间
+ * @property string $password_reset_token 密码重置TOKEN
  * @property string $last_login_at 最后登录时间
+ * @property int $rate_limit 速率限制
+ * @property int $allowance 剩余请求次数
+ * @property int $allowance_updated_at 请求时间戳
+ * @property int $status 状态
  * @property string $created_at 创建时间
  * @property string $updated_at 更新时间
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitInterface
 {
 
+    const STATUS_DELETED = -1;
+    const STATUS_INACTIVE = 9;
+    const STATUS_ACTIVE = 10;
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'user';
+        return '{{%user}}';
     }
 
     /**
@@ -45,13 +51,15 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     public function rules()
     {
         return [
-            [['username', 'password_hash'], 'required'],
+            [['mobile_phone', 'username', 'password_hash', 'access_token'], 'required'],
+            [['role', 'points', 'rate_limit', 'allowance', 'allowance_updated_at', 'status'], 'integer'],
             [['access_token_expired_at', 'last_login_at', 'created_at', 'updated_at'], 'safe'],
-            [['status', 'allowance', 'allowance_updated_at'], 'integer'],
-            [['username', 'password_hash', 'access_token', 'password_reset_token', 'email', 'raw_role', 'auth_key', 'rate_limit'], 'string', 'max' => 255],
-            [['avatar_url'], 'string', 'max' => 2873],
             [['mobile_phone'], 'string', 'max' => 20],
+            [['we_chat_open_id', 'username', 'password_hash', 'access_token', 'avatar_url', 'email', 'auth_key', 'password_reset_token'], 'string', 'max' => 255],
+            [['mobile_phone'], 'unique'],
             [['username'], 'unique'],
+            [['access_token'], 'unique'],
+            [['we_chat_open_id'], 'unique'],
         ];
     }
 
@@ -62,21 +70,23 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     {
         return [
             'id' => Yii::t('app', 'ID'),
-            'username' => Yii::t('app', '登录用户名'),
-            'avatar_url' => Yii::t('app', '头像地址'),
+            'mobile_phone' => Yii::t('app', '手机号码'),
+            'we_chat_open_id' => Yii::t('app', '微信 OPENID'),
+            'username' => Yii::t('app', '用户名'),
             'password_hash' => Yii::t('app', '密码'),
-            'auth_key' => Yii::t('app', 'AUTH KEY'),
-            'access_token' => Yii::t('app', 'TOKEN'),
-            'password_reset_token' => Yii::t('app', 'RESET TOKEN'),
-            'access_token_expired_at' => Yii::t('app', 'TOKEN EXPIRED AT'),
-            'email' => Yii::t('app', '电子邮箱'),
-            'mobile_phone' => Yii::t('app', '移动电话'),
-            'raw_role' => Yii::t('app', '原始角色'),
-            'status' => Yii::t('app', '状态'),
-            'allowance' => Yii::t('app', 'ALLOWANCE'),
-            'allowance_updated_at' => Yii::t('app', 'ALLOWANCE UPDATED AT'),
-            'rate_limit' => Yii::t('app', 'RATE LIMIT'),
+            'access_token' => Yii::t('app', 'ACCESS_TOKEN'),
+            'role' => Yii::t('app', '角色'),
+            'points' => Yii::t('app', '积分'),
+            'avatar_url' => Yii::t('app', '头像'),
+            'email' => Yii::t('app', '电子邮件'),
+            'auth_key' => Yii::t('app', '验证KEY'),
+            'access_token_expired_at' => Yii::t('app', 'TOKEN 过期时间'),
+            'password_reset_token' => Yii::t('app', '密码重置TOKEN'),
             'last_login_at' => Yii::t('app', '最后登录时间'),
+            'rate_limit' => Yii::t('app', '速率限制'),
+            'allowance' => Yii::t('app', '剩余请求次数'),
+            'allowance_updated_at' => Yii::t('app', '请求时间戳'),
+            'status' => Yii::t('app', '状态'),
             'created_at' => Yii::t('app', '创建时间'),
             'updated_at' => Yii::t('app', '更新时间'),
         ];
@@ -96,7 +106,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public static function findIdentity($id)
     {
-        return null;
+        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -108,14 +118,61 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     }
 
     /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
+     * @param $username
+     * @return User|null
      */
     public static function findByUsername($username)
     {
-        return null;
+        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Finds user by password reset token
+     *
+     * @param string $token password reset token
+     * @return static|null
+     */
+    public static function findByPasswordResetToken($token)
+    {
+        if (!static::isPasswordResetTokenValid($token)) {
+            return null;
+        }
+
+        return static::findOne([
+            'password_reset_token' => $token,
+            'status' => self::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Finds user by verification email token
+     *
+     * @param string $token verify email token
+     * @return static|null
+     */
+    public static function findByVerificationToken($token)
+    {
+        return static::findOne([
+            'verification_token' => $token,
+            'status' => self::STATUS_INACTIVE
+        ]);
+    }
+
+    /**
+     * Finds out if password reset token is valid
+     *
+     * @param string $token password reset token
+     * @return bool
+     */
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+
+        $timestamp = (int)substr($token, strrpos($token, '_') + 1);
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        return $timestamp + $expire >= time();
     }
 
     /**
@@ -123,7 +180,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public function getId()
     {
-        return $this->id;
+        return $this->getPrimaryKey();
     }
 
     /**
@@ -139,7 +196,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public function validateAuthKey($authKey)
     {
-        return $this->auth_key === $authKey;
+        return $this->getAuthKey() === $authKey;
     }
 
     /**
@@ -150,23 +207,41 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 
-    public function fields()
+    /**
+     * @param $password
+     * @throws \yii\base\Exception
+     */
+    public function setPassword($password)
     {
-        return [
-            'id',
-            'username',
-            'avatar_url',
-            'email',
-            'mobile_phone',
-            'raw_role',
-            'status',
-            'created_at',
-            'last_login_at',
-        ];
-        //return parent::fields(); // TODO: Change the autogenerated stub
+        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
+     * Generates "remember me" authentication key
+     */
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+    /**
+     * Generates new password reset token
+     */
+    public function generatePasswordResetToken()
+    {
+        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+
+    /**
+     * Removes password reset token
+     */
+    public function removePasswordResetToken()
+    {
+        $this->password_reset_token = null;
     }
 
     /**
@@ -178,7 +253,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public function getRateLimit($request, $action)
     {
-        return [$this->rate_limit, 1]; // $rateLimit requests per second
+        return [$this->rate_limit, 100]; // $rateLimit requests per second
     }
 
     /**
