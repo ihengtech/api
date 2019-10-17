@@ -1,11 +1,11 @@
 <?php
 
 return [
+    /*
     [
         'class' => 'yii\rest\UrlRule',
         'controller' => 'user'
     ]
-    /*
     [
         'class' => 'yii\rest\UrlRule',
         'controller' => 'face',
@@ -15,11 +15,9 @@ return [
         ],
     ],
     */
-    /*
     [
         'class' => 'yii\rest\UrlRule',
         'controller' => 'file-manage',
         'except' => ['update', 'index', 'view', 'delete', 'options'],
     ]
-    */
 ];

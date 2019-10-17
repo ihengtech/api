@@ -220,7 +220,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     }
 
     /**
-     * Generates "remember me" authentication key
+     * @throws \yii\base\Exception
      */
     public function generateAuthKey()
     {
@@ -228,13 +228,12 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     }
 
     /**
-     * Generates new password reset token
+     * @throws \yii\base\Exception
      */
     public function generatePasswordResetToken()
     {
         $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
-
 
     /**
      * Removes password reset token
@@ -253,7 +252,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public function getRateLimit($request, $action)
     {
-        return [$this->rate_limit, 1000]; // $rateLimit requests per second
+        return [$this->rate_limit, 1]; // $rateLimit requests per second
     }
 
     /**
