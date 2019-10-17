@@ -253,7 +253,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
      */
     public function getRateLimit($request, $action)
     {
-        return [$this->rate_limit, 100]; // $rateLimit requests per second
+        return [$this->rate_limit, 1000]; // $rateLimit requests per second
     }
 
     /**
