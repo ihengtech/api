@@ -60,7 +60,7 @@ class FileManageController extends ActiveController
     public function actionCreate()
     {
         $this->checkAccess($this->id);
-        $model = new FileManage();
+        $model = new FileManage(['scenario' => FileManage::SCENARIO_CREATE]);
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
         if ($model->save()) {
             return $model;
@@ -80,7 +80,7 @@ class FileManageController extends ActiveController
     public function actionUpload()
     {
         $this->checkAccess($this->id);
-        $model = new FileManage();
+        $model = new FileManage(['scenario' => FileManage::SCENARIO_UPLOAD]);
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
         if ($model->save()) {
             return $model;

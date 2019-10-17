@@ -17,12 +17,29 @@ use Yii;
  */
 class FileManage extends \yii\db\ActiveRecord
 {
+
+    const SCENARIO_CREATE = 'create';
+    const SCENARIO_UPLOAD = 'upload';
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
         return '{{%file_manage}}';
+    }
+
+    /**
+     * 场景
+     * @return array
+     */
+    public function scenarios()
+    {
+        $attributeLabels = array_keys($this->attributeLabels());
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE] = $attributeLabels;
+        $scenarios[self::SCENARIO_UPLOAD] = $attributeLabels;
+        return $scenarios;
     }
 
     /**
@@ -35,7 +52,9 @@ class FileManage extends \yii\db\ActiveRecord
             [['raw_name', 'unique_name'], 'required'],
             [['detail'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['raw_name', 'unique_name'], 'string', 'max' => 255],
+            [['unique_name'], 'string', 'max' => 255],
+            //场景
+            [['raw_name'], 'file', 'extensions' => 'png,jpg,jpeg,gif', 'on' => FileManage::SCENARIO_UPLOAD],
         ];
     }
 
