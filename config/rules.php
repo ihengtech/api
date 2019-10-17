@@ -19,5 +19,8 @@ return [
         'class' => 'yii\rest\UrlRule',
         'controller' => 'file-manage',
         'except' => ['update', 'index', 'view', 'delete', 'options'],
+        'extraPatterns' => [
+            'POST upload' => 'upload',
+        ],
     ]
 ];
