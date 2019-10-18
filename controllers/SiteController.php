@@ -29,6 +29,7 @@ class SiteController extends ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
+        /*
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
             'authMethods' => [
@@ -37,6 +38,7 @@ class SiteController extends ActiveController
                 QueryParamAuth::className(),
             ],
         ];
+        */
         //$behaviors['rateLimiter']['enableRateLimitHeaders'] = false;
         return $behaviors;
     }
