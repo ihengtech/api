@@ -3,3 +3,4 @@ runtime
 web/assets
 /vendor
 /upload
+/tests/_output
