@@ -52,10 +52,43 @@ class FileManageController extends ActiveController
     }
 
     /**
+     * base64
      * @return FileManage
      * @throws ServerErrorHttpException
      */
     public function actionCreate()
+    {
+        $model = new FileManage();
+        $fileBase64 = Yii::$app->request->post('raw_name');
+        if (empty($fileBase64)) {
+            $model->addError('raw_name', "请上传base64图片");
+            return $model;
+        }
+        $fileBase64 = preg_replace("#^data:image/jpeg;base64,#", "", $fileBase64);
+        $file = base64_decode($fileBase64, true);
+        if (empty($file)) {
+            $model->addError('raw_name', "文件解码错误!");
+            return $model;
+        }
+        $model->setDefaultField();
+        $model->raw_name = uniqid('jpeg');
+        $model->unique_name = $model->getUniqueName($model->raw_name, 'jpeg');
+        $savePath = Yii::getAlias('@fileManage') . DIRECTORY_SEPARATOR . $model->unique_name;
+        if (file_put_contents($savePath, $file) && $model->save(false)) {
+            return $model;
+        } elseif (!$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
+        }
+        return $model;
+
+    }
+
+    /**
+     * 上传
+     * @return FileManage
+     * @throws ServerErrorHttpException
+     */
+    public function actionUpload()
     {
         $model = new FileManage();
         $model->raw_name = UploadedFile::getInstanceByName('raw_name');
