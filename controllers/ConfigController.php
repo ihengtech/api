@@ -28,6 +28,19 @@ class ConfigController extends ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+            'cors' => [
+                // restrict access to
+                'Origin' => \Yii::$app->params['allowOrigin'],
+                'Access-Control-Request-Method' => \Yii::$app->params['accessControlRequestMethod'],
+                'Access-Control-Allow-Credentials' => true,
+                // Allow OPTIONS caching
+                'Access-Control-Max-Age' => \Yii::$app->params['accessControlMaxAge'],
+                'Access-Control-Expose-Headers' => \Yii::$app->params['accessControlExposeHeaders'],
+                'Access-Control-Allow-Headers' => \Yii::$app->params['accessControlAllowHeaders'],
+            ],
+        ];
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
             'authMethods' => [

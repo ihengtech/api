@@ -33,6 +33,19 @@ class MerchandiseController extends ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+            'cors' => [
+                // restrict access to
+                'Origin' => \Yii::$app->params['allowOrigin'],
+                'Access-Control-Request-Method' => \Yii::$app->params['accessControlRequestMethod'],
+                'Access-Control-Allow-Credentials' => true,
+                // Allow OPTIONS caching
+                'Access-Control-Max-Age' => \Yii::$app->params['accessControlMaxAge'],
+                'Access-Control-Expose-Headers' => \Yii::$app->params['accessControlExposeHeaders'],
+                'Access-Control-Allow-Headers' => \Yii::$app->params['accessControlAllowHeaders'],
+            ],
+        ];
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
             'authMethods' => [
@@ -61,8 +74,8 @@ class MerchandiseController extends ActiveController
         $wareType = intval(Yii::$app->request->get('wareType'));
         $httpClient = new HttpClient();
         $data = $httpClient->get($url, [
-            'wareModel' => '温碧泉',
-            'wareType' => '1',
+            'wareModel' => $wareModel,
+            'wareType' => $wareType
         ]);
         Yii::debug(Json::encode($data));
         return Util::parseHttpClientWaresData($data);
