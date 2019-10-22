@@ -108,10 +108,10 @@ class FaceDetectController extends ActiveController
                     $items[] = ['key' => '貌美', 'value' => $face['beauty']];
                 }
                 if (isset($face['emotion']['type'])) {
-                    $items[] = ['key' => '', 'value' => $this->getEmotionType($face['emotion']['type'])];
+                    $items[] = ['key' => '表情', 'value' => $this->getEmotionType($face['emotion']['type'])];
                 }
             }
-            return $this->asJson($content);
+            return $this->asJson($items);
         }
         throw new NotFoundHttpException('图片不存在!');
     }
@@ -124,7 +124,7 @@ class FaceDetectController extends ActiveController
             'happy' => '高兴',
             'sad' => '伤心',
             'surprise' => '惊讶',
-            'neutral' => '无情绪',
+            //'neutral' => '无情绪',
         ];
         return isset($types[$type]) ? $types[$type] : '自然';
     }
