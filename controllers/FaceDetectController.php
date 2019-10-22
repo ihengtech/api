@@ -91,15 +91,42 @@ class FaceDetectController extends ActiveController
             $data = $httpClient->post($url, ['file' => curl_file_create($filePath)], [], [], false);
             Yii::debug(Json::encode($data));
             $content = Util::parseHttpClientFaceDetectData($data);
-            //@debug
-            return [
-                ['key' => '性别', 'value' => '男'],
-                ['key' => '年龄', 'value' => '20'],
-                ['key' => '得分', 'value' => '100'],
-                ['key' => '表情', 'value' => '微笑'],
-            ];
+            $items = [];
+            if (isset($content['result']['face_list'][0])) {
+                $face = $content['result']['face_list'][0];
+                if (isset($face['age'])) {
+                    $items[] = ['key' => '年龄', 'value' => $face['age'],];
+                }
+                if (isset($face['gender'])) {
+                    if ($face['gender']['type'] == 'male') {
+                        $items[] = ['key' => '性别', 'value' => '男',];
+                    } else {
+                        $items[] = ['key' => '性别', 'value' => '女',];
+                    }
+                }
+                if (isset($face['beauty'])) {
+                    $items[] = ['key' => '貌美', 'value' => $face['beauty']];
+                }
+                if (isset($face['emotion']['type'])) {
+                    $items[] = ['key' => '', 'value' => $this->getEmotionType($face['emotion']['type'])];
+                }
+            }
+            return $this->asJson($content);
         }
         throw new NotFoundHttpException('图片不存在!');
+    }
+
+    private function getEmotionType($type) {
+        $types = [
+            'angry' => '愤怒',
+            'disgust' => '厌恶',
+            'fear' => '恐惧',
+            'happy' => '高兴',
+            'sad' => '伤心',
+            'surprise' => '惊讶',
+            'neutral' => '无情绪',
+        ];
+        return isset($types[$type]) ? $types[$type] : '自然';
     }
 
     public function checkAccess($action, $model = null, $params = [])
